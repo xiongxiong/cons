@@ -2,8 +2,10 @@ package cons
 
 import "sync"
 
+type signal struct{}
+
 type done struct {
-	c chan interface{}
+	c chan signal
 }
 
 type wait done
@@ -29,8 +31,8 @@ func (cs *Cons) check(key interface{}) Con {
 	}
 
 	if cs.theMap[key] == nil {
-		d := done{make(chan interface{})}
-		w := wait{make(chan interface{})}
+		d := done{make(chan signal)}
+		w := wait{make(chan signal)}
 		cs.theMap[key] = &w
 		go reset(d, w)
 		return Con{con: &d}
@@ -75,6 +77,6 @@ func (cs *Cons) Skip(key interface{}) Con {
 func (c Con) Done() {
 	switch s := c.con.(type) {
 	case *done:
-		s.c <- nil
+		s.c <- signal{}
 	}
 }
