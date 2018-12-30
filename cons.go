@@ -47,6 +47,18 @@ func GetCons() *Cons {
 	}
 }
 
+var cons = GetCons()
+
+// Wait ...
+func Wait(key interface{}) Con {
+	return cons.Wait(key)
+}
+
+// Skip ...
+func Skip(key interface{}) Con {
+	return cons.Skip(key)
+}
+
 // Con ...
 type Con struct {
 	Skip bool

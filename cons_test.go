@@ -8,14 +8,13 @@ import (
 )
 
 func TestWait(t *testing.T) {
-	con := cons.GetCons()
 	wg := sync.WaitGroup{}
 
 	x := 0
 	wait := func() {
 		defer wg.Done()
 
-		c := con.Wait("hello")
+		c := cons.Wait("hello")
 		defer c.Done()
 
 		if x == 0 {
@@ -37,14 +36,13 @@ func TestWait(t *testing.T) {
 }
 
 func TestSkip(t *testing.T) {
-	con := cons.GetCons()
 	wg := sync.WaitGroup{}
 
 	x := 0
 	wait := func() {
 		defer wg.Done()
 
-		c := con.Skip("hello")
+		c := cons.Skip("hello")
 		defer c.Done()
 
 		if c.Skip {
