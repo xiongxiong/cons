@@ -36,6 +36,34 @@ func TestWait(t *testing.T) {
 	t.Logf("x >>> %d", x)
 }
 
+func ExampleWait() {
+	wg := sync.WaitGroup{}
+
+	x := 0
+	wait := func() {
+		defer wg.Done()
+
+		c := cons.Wait("hello")
+		defer c.Done()
+
+		if x == 0 {
+			fmt.Println("--- sleeping")
+			time.Sleep(1 * time.Second)
+			x++
+			return
+		}
+		fmt.Println("awake")
+	}
+
+	for range [100]int{} {
+		wg.Add(1)
+		go wait()
+	}
+	wg.Wait()
+
+	fmt.Printf("x >>> %d", x)
+}
+
 func TestSkip(t *testing.T) {
 	wg := sync.WaitGroup{}
 
@@ -62,6 +90,34 @@ func TestSkip(t *testing.T) {
 	wg.Wait()
 
 	t.Logf("x >>> %d", x)
+}
+
+func ExampleSkip() {
+	wg := sync.WaitGroup{}
+
+	x := 0
+	wait := func() {
+		defer wg.Done()
+
+		c := cons.Skip("hello")
+		defer c.Done()
+
+		if c.Skip {
+			fmt.Println("skip")
+			return
+		}
+		fmt.Println("--- doing")
+		time.Sleep(1 * time.Second)
+		x++
+	}
+
+	for range [100]int{} {
+		wg.Add(1)
+		go wait()
+	}
+	wg.Wait()
+
+	fmt.Printf("x >>> %d", x)
 }
 
 func TestQueue(t *testing.T) {
@@ -92,4 +148,34 @@ func TestQueue(t *testing.T) {
 	wg.Wait()
 
 	t.Logf("x >>> %d", x)
+}
+
+func ExampleQueue() {
+	wg := sync.WaitGroup{}
+
+	x := 0
+	queue := func() {
+		defer wg.Done()
+
+		fmt.Println("waiting...")
+		c := cons.Queue("hello")
+		defer c.Done()
+
+		fmt.Printf("--- in queue : %d\n", x)
+		time.Sleep(1 * time.Second)
+		x++
+	}
+
+	for range [5]int{} {
+		wg.Add(1)
+		go queue()
+	}
+	time.Sleep(3 * time.Second)
+	for range [5]int{} {
+		wg.Add(1)
+		go queue()
+	}
+	wg.Wait()
+
+	fmt.Printf("x >>> %d", x)
 }

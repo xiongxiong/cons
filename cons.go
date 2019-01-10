@@ -16,7 +16,7 @@ type queue struct {
 	count int
 }
 
-// Cons ...
+// Cons key collection
 type Cons struct {
 	sync.Mutex
 	mapWait  map[interface{}]*wait
@@ -80,7 +80,7 @@ func (cs *Cons) queue(key interface{}) Con {
 	return Con{con: q}
 }
 
-// GetCons ...
+// GetCons get key collection
 func GetCons() *Cons {
 	return &Cons{
 		mapWait:  make(map[interface{}]*wait),
@@ -90,28 +90,28 @@ func GetCons() *Cons {
 
 var cons = GetCons()
 
-// Wait ...
+// Wait wait for a key if it's using right now.
 func Wait(key interface{}) Con {
 	return cons.Wait(key)
 }
 
-// Skip ...
+// Skip skip for a key if it's using right now.
 func Skip(key interface{}) Con {
 	return cons.Skip(key)
 }
 
-// Queue ...
+// Queue queue for a key if it's using right now.
 func Queue(key interface{}) Con {
 	return cons.Queue(key)
 }
 
-// Con ...
+// Con key controller
 type Con struct {
 	Skip bool
 	con  interface{}
 }
 
-// Wait ...
+// Wait wait for a key if it's using right now.
 func (cs *Cons) Wait(key interface{}) Con {
 	c := cs.check(key)
 	switch s := c.con.(type) {
@@ -121,7 +121,7 @@ func (cs *Cons) Wait(key interface{}) Con {
 	return c
 }
 
-// Skip ...
+// Skip skip for a key if it's using right now.
 func (cs *Cons) Skip(key interface{}) Con {
 	c := cs.check(key)
 	switch c.con.(type) {
@@ -131,7 +131,7 @@ func (cs *Cons) Skip(key interface{}) Con {
 	return c
 }
 
-// Queue ...
+// Queue queue for a key if it's using right now.
 func (cs *Cons) Queue(key interface{}) Con {
 	c := cs.queue(key)
 	switch s := c.con.(type) {
@@ -141,7 +141,7 @@ func (cs *Cons) Queue(key interface{}) Con {
 	return c
 }
 
-// Done ...
+// Done call Done() to signal key controller to free the key
 func (c Con) Done() {
 	switch s := c.con.(type) {
 	case *done:
