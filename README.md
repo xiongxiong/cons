@@ -13,14 +13,16 @@ An easy to use, key lock tool, lock according to the same key, not lock on diffe
     - [Get cons (lock map)](#get-cons-lock-map)
     - [Wait on key using](#wait-on-key-using)
     - [Skip on key using](#skip-on-key-using)
+    - [Queue on key using](#queue-on-key-using)
 - [Author](#author)
 - [License](#license)
 
 <!-- /TOC -->
 
 ## Features
-- [x] wait on key using
-- [x] skip on key using
+- [x] wait on key using, for concurrent usages, only the first usage will execute, others will wait for the first to finish, and then all can continue at the same time, used for waiting for something to happen once and only once, and it's a forerunner condition.
+- [x] skip on key using, for concurrent usages, only the first usage will execute, others will be marked as skip, used for something to happen once at the same time.
+- [x] queue on key using, for concurrent usages, usages will be queued one by one, until all finished.
 
 ## Requirements
 
@@ -59,6 +61,13 @@ if c.Skip {
     println("skip")
     return
 }
+```
+
+### Queue on key using
+
+```go
+c := cons.Queue("hello")
+defer c.Done()
 ```
 
 ## Author
