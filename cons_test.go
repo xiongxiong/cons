@@ -80,6 +80,7 @@ func TestSkip(t *testing.T) {
 		}
 		t.Log("--- doing")
 		time.Sleep(1 * time.Second)
+		t.Log("--- done")
 		x++
 	}
 
@@ -90,6 +91,51 @@ func TestSkip(t *testing.T) {
 	wg.Wait()
 
 	t.Logf("x >>> %d", x)
+}
+
+func TestSkipCurrent(t *testing.T) {
+	fa := func(wg *sync.WaitGroup, cs *cons.Cons, flag string, index int) {
+		defer wg.Done()
+
+		c := cs.Skip("hello")
+		defer c.Done()
+
+		if c.Skip {
+			println("skip -- ", flag, index)
+			return
+		}
+
+		println("doing -- ", flag, index)
+		time.Sleep(3 * time.Second)
+		println("done -- ", flag, index)
+	}
+
+	csa := cons.GetCons()
+	wga := sync.WaitGroup{}
+
+	wga.Add(1)
+	go func() {
+		defer wga.Done()
+		for i := 0; i < 10; i++ {
+			wga.Add(1)
+			go fa(&wga, csa, "a", i)
+		}
+	}()
+
+	csb := cons.GetCons()
+	wgb := sync.WaitGroup{}
+
+	wgb.Add(1)
+	go func() {
+		defer wgb.Done()
+		for i := 0; i < 10; i++ {
+			wgb.Add(1)
+			go fa(&wgb, csb, "b", i)
+		}
+	}()
+
+	wga.Wait()
+	wgb.Wait()
 }
 
 func ExampleSkip() {

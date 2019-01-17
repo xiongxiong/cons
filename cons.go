@@ -24,9 +24,6 @@ type Cons struct {
 }
 
 func (cs *Cons) check(key interface{}) Con {
-	cs.Lock()
-	defer cs.Unlock()
-
 	reset := func(d *done, w *wait) {
 		<-d.c
 		close(d.c)
@@ -36,6 +33,9 @@ func (cs *Cons) check(key interface{}) Con {
 		defer cs.Unlock()
 		delete(cs.mapWait, key)
 	}
+
+	cs.Lock()
+	defer cs.Unlock()
 
 	if cs.mapWait[key] == nil {
 		d := done{make(chan signal)}
@@ -48,26 +48,26 @@ func (cs *Cons) check(key interface{}) Con {
 }
 
 func (cs *Cons) queue(key interface{}) Con {
-	cs.Lock()
-	defer cs.Unlock()
-
 	reset := func(q *queue) {
 		for {
 			<-q.cc
 
-			cs.Lock()
 			q.count--
 			if q.count == 0 {
 				close(q.c)
 				close(q.cc)
+				cs.Lock()
 				delete(cs.mapQueue, key)
+				cs.Unlock()
 				break
 			} else {
 				q.c <- signal{}
 			}
-			cs.Unlock()
 		}
 	}
+
+	cs.Lock()
+	defer cs.Unlock()
 
 	if cs.mapQueue[key] == nil {
 		q := queue{make(chan signal, 1), make(chan signal), 0}
